@@ -1,0 +1,4 @@
+ALTER TABLE localities ADD COLUMN IF NOT EXISTS lat NUMERIC(9,6);
+ALTER TABLE localities ADD COLUMN IF NOT EXISTS lon NUMERIC(9,6);
+
+CREATE INDEX IF NOT EXISTS localities_coordinates_idx ON localities(lat, lon) WHERE lat IS NOT NULL AND lon IS NOT NULL;

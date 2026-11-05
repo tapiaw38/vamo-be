@@ -1,0 +1,128 @@
+openapi: 3.0.3
+info:
+  title: VAMO Backend API
+  version: 0.1.0
+  description: VAMO REST API through the gateway.
+servers:
+  - url: /api/v1
+paths:
+  /provinces:
+    get:
+      summary: List Argentine provinces
+      responses:
+        '200': { description: Provinces }
+  /provinces/{id}/localities:
+    get:
+      summary: List localities by province
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Localities }
+  /localities/search:
+    get:
+      summary: Search localities by normalized prefix
+      parameters:
+        - { name: q, in: query, required: true, schema: { type: string } }
+      responses:
+        '200': { description: Search results }
+  /users/me:
+    get:
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: Profile } }
+    patch:
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: Updated profile } }
+  /trips:
+    get:
+      summary: Search published trips
+      parameters:
+        - { name: origin_locality_id, in: query, schema: { type: string } }
+        - { name: destination_locality_id, in: query, schema: { type: string } }
+        - { name: date, in: query, schema: { type: string, format: date } }
+        - { name: passengers, in: query, schema: { type: integer, minimum: 1 } }
+      responses: { '200': { description: Trip results } }
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Publish driver trip
+      responses: { '201': { description: Published trip } }
+  /trips/{id}:
+    get:
+      summary: Get public trip detail
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses: { '200': { description: Trip detail } }
+    patch:
+      security: [{ bearerAuth: [] }]
+      summary: Edit own trip
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses: { '200': { description: Updated trip } }
+  /trips/{id}/cancel:
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Cancel own trip before departure
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses: { '200': { description: Cancelled trip } }
+  /trips/mine:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: List own trips
+      responses: { '200': { description: Own trips } }
+  /trips/{id}/bookings:
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Create booking
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses: { '201': { description: Created booking } }
+  /bookings/mine:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: List passenger bookings
+      responses: { '200': { description: Passenger bookings } }
+  /bookings/received:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: List driver received bookings
+      responses: { '200': { description: Received bookings } }
+  /bookings/{id}:
+    get:
+      security: [{ bearerAuth: [] }]
+      summary: Get visible booking
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses: { '200': { description: Booking detail } }
+  /bookings/{id}/cancel:
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Cancel own booking
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses: { '200': { description: Cancelled booking } }
+  /bookings/{id}/confirm:
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Confirm manual booking as trip publisher
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses: { '200': { description: Confirmed booking } }
+  /bookings/{id}/reject:
+    post:
+      security: [{ bearerAuth: [] }]
+      summary: Reject manual booking as trip publisher
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses: { '200': { description: Rejected booking } }
+  /health:
+    get:
+      summary: Liveness
+      responses:
+        '200':
+          description: Service is alive
+  /ready:
+    get:
+      summary: Readiness
+      responses:
+        '200':
+          description: Database is reachable
+        '503':
+          description: Database is unavailable
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
